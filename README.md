@@ -2,33 +2,31 @@
 
 Merge Empty pve-data into Root on Proxmox VE
 
-Merge all free space from an empty LVM pve-data logical volume into your root partition (pve-root) safely on Proxmox VE.
+Safely deletes an empty LVM pve-data logical volume and merges its space into the root partition (pve-root) on Proxmox VE.
 
 ⚠️ Warning
 
-This script will permanently delete all data on pve-data. Only run it if:
+All data in pve-data will be permanently deleted.
 
-pve-data is empty
+Only run if pve-data is empty or fully backed up.
 
-Or you have backed up everything on that volume
-
-Do not run on systems where pve-data contains active VMs, containers, or important files.
+Do not run on systems with active VMs or containers in pve-data.
 
 Features
 
-Deletes the empty pve-data logical volume
+Deletes empty pve-data LV
 
 Expands pve-root to reclaim all freed space
 
 Resizes the ext4 filesystem
 
-Stops and restarts necessary Proxmox services automatically
+Stops and restarts Proxmox services automatically
 
 Shows updated disk usage after completion
 
 Requirements
 
-Proxmox VE 7.x or later
+Proxmox VE 7.x+
 
 ext4 root filesystem (pve-root)
 
@@ -36,9 +34,18 @@ LVM volume group named pve
 
 Run as root
 
-Usage
+Quick Install & Run
 
-Download or create the script:
+One-liner to download and execute the script safely:
+
+curl -sSL https://raw.githubusercontent.com/samsundfred/Proxmox-data-2-root/main/merge_pve_data.sh | sudo bash
+
+
+Replace YourUsername/proxmox-scripts with your GitHub repo path.
+
+Manual Installation
+
+Create the script file:
 
 nano merge_pve_data.sh
 # Paste the script content
@@ -49,26 +56,9 @@ Make it executable:
 chmod +x merge_pve_data.sh
 
 
-Run the script as root:
+Run it as root:
 
 sudo ./merge_pve_data.sh
-
-
-After completion, your root partition (pve-root) will include all previously allocated pve-data space.
-
-How it Works
-
-Stops Proxmox storage services (pvedaemon, pve-cluster, pve-storage)
-
-Deletes the empty pve-data logical volume
-
-Extends pve-root to occupy all free space in the LVM volume group pve
-
-Resizes the filesystem to use the new space
-
-Restarts Proxmox services
-
-Displays updated disk usage with df -h /
 
 Example Output
 === Stopping Proxmox services ===
@@ -85,7 +75,20 @@ Filesystem      Size  Used Avail Use% Mounted on
 /dev/mapper/pve-root
                 160G   6G  150G   4% /
 
+How it Works
+
+Stops Proxmox services (pvedaemon, pve-cluster, pve-storage)
+
+Deletes the empty pve-data LV
+
+Extends pve-root to use all free space in LVM
+
+Resizes the root filesystem (resize2fs)
+
+Restarts Proxmox services
+
+Shows updated disk usage
+
 License
 
-MIT License
- – free to use, modify, and distribute.
+MIT License – free to use, modify, and distribute.
